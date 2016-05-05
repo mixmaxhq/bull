@@ -89,6 +89,27 @@ describe('Job', function(){
       });
     });
 
+    it('removes any job from active set', function() {
+      return queue.add({ foo: 'bar' }).then(function(job) {
+        // Simulate a job in active state but not locked
+        return queue.moveJob('wait', 'active').then(function() {
+          return job.isActive().then(function(isActive) {
+            expect(isActive).to.be(true);
+            return job.remove();
+          });
+        }).then(function() {
+          return Job.fromId(queue, job.jobId);
+        }).then(function(stored) {
+          expect(stored).to.be(null);
+          return job.getState();
+        }).then(function(state) {
+          // This check is a bit of a hack. A job that is not found in any list will return the state
+          // stuck.
+          expect(state).to.equal('stuck');
+        });
+      });
+    });
+
     it('emits removed event', function (cb) {
       queue.once('removed', function (job) {
         expect(job.data.foo).to.be.equal('bar');
