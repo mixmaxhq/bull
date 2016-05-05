@@ -119,6 +119,30 @@ describe('Job', function(){
         job.remove();
       });
     });
+
+    it('a succesful job should be removable', function(done) {
+      queue.process(function () {
+        return Promise.resolve();
+      });
+
+      queue.add({ foo: 'bar' });
+
+      queue.on('completed', function(job) {
+        job.remove().then(done).catch(done);
+      });
+    });
+
+    it('a failed job should be removable', function(done) {
+      queue.process(function () {
+        throw new Error();
+      });
+
+      queue.add({ foo: 'bar' });
+
+      queue.on('failed', function(job) {
+        job.remove().then(done).catch(done);
+      });
+    });
   });
 
   describe('.retry', function () {
