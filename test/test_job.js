@@ -75,6 +75,20 @@ describe('Job', function(){
         });
     });
 
+    it('fails to remove a locked job', function() {
+      return Job.create(queue, 1, {foo: 'bar'}).then(function(job) {
+        return job.takeLock().then(function(lock) {
+          expect(lock).to.be(true);
+        }).then(function() {
+          return job.remove();
+        }).then(function() {
+          throw new Error('Should not be able to remove a locked job');
+        }).catch(function(err) {
+          expect(err.message).to.equal('Could not get lock for job: ' + job.jobId + '. Cannot remove job.');
+        });
+      });
+    });
+
     it('emits removed event', function (cb) {
       queue.once('removed', function (job) {
         expect(job.data.foo).to.be.equal('bar');
