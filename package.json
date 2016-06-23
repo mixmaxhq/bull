@@ -1,11 +1,11 @@
 {
   "name": "bull",
-  "version": "1.0.0-rc4",
+  "version": "1.0.0-mixmax1",
   "description": "Job manager",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/OptimalBits/bull.git"
+    "url": "git://github.com/mixmaxhq/bull.git"
   },
   "keywords": [
     "job",
