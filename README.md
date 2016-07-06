@@ -2,13 +2,13 @@ Bull Job Manager
 ================
 
 [![Join the chat at https://gitter.im/OptimalBits/bull](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/OptimalBits/bull?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
+[![npm](https://img.shields.io/npm/dm/bull.svg?maxAge=2592000)]()
 [![BuildStatus](https://secure.travis-ci.org/OptimalBits/bull.png?branch=master)](http://travis-ci.org/OptimalBits/bull)
 [![NPM version](https://badge.fury.io/js/bull.svg)](http://badge.fury.io/js/bull)
 
 ![bull](http://files.softicons.com/download/animal-icons/animal-icons-by-martin-berube/png/128/bull.png)
 
-A lightweight, robust and fast job processing queue.
+The fastest, more reliable redis based queue for nodejs.
 Carefully written for rock solid stability and atomicity.
 
 It uses redis for persistence, so the queue is not lost if the server goes
@@ -568,7 +568,7 @@ __Arguments__
 #### Queue##clean(options)
 
 Tells the queue remove all jobs created outside of a grace period.
-You can clean the jobs with the following states: completed, waiting, active,
+You can clean the jobs with the following states: completed, wait, active,
 delayed, and failed.
 
 __Example__
