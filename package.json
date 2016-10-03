@@ -1,6 +1,6 @@
 {
   "name": "bull",
-  "version": "1.0.0-mixmax2",
+  "version": "1.0.0-mixmax3",
   "description": "Job manager",
   "main": "index.js",
   "repository": {
