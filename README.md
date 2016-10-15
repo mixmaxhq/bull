@@ -55,6 +55,7 @@ var Queue = require('bull');
 var videoQueue = Queue('video transcoding', 6379, '127.0.0.1');
 var audioQueue = Queue('audio transcoding', 6379, '127.0.0.1');
 var imageQueue = Queue('image transcoding', 6379, '127.0.0.1');
+var pdfQueue = Queue('pdf transcoding', 6379, '127.0.0.1');
 
 videoQueue.process(function(job, done){
 
@@ -114,7 +115,7 @@ imageQueue.process(function(job, done){
 pdfQueue.process(function(job){
   // Processors can also return promises instead of using the done callback
   return pdfAsyncProcessor();
-}
+});
 
 videoQueue.add({video: 'http://example.com/video1.mov'});
 audioQueue.add({audio: 'http://example.com/audio1.mp3'});
@@ -317,7 +318,8 @@ listened by some other service that stores the results in a database.
 ## Reference
 
 <a name="queue"/>
-###Queue(queueName, redisPort, redisHost, [redisOpts], [queueOpts])
+###Queue(queueName, redisPort, redisHost, [redisOpts])
+###Queue(queueName, redisConnectionString, [redisOpts])
 
 This is the Queue constructor. It creates a new Queue that is persisted in
 Redis. Everytime the same queue is instantiated it tries to process all the
@@ -330,9 +332,6 @@ __Arguments__
     redisPort {Number} A port where redis server is running.
     redisHost {String} A host specified as IP or domain where redis is running.
     redisOptions {Object} Options to pass to the redis client. https://github.com/mranney/node_redis
-    queueOpts {Object} Options to drive the Queue behavior
-    queueOpts.processStalledJobs {Boolean} Automatically process potentially jobs stuck in active
-    state (default: true)
 ```
 
 ---------------------------------------
