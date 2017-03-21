@@ -227,6 +227,29 @@ describe('Queue', function () {
       }, done);
     });
 
+    it('should remove job after failed if removeOnFail', function (done) {
+      queue.process(function (job) {
+        expect(job.data.foo).to.be.equal('bar');
+        throw Error('error')
+      }).catch(done);
+
+      queue.add({ foo: 'bar' }, {removeOnFail: true}).then(function (job) {
+        expect(job.jobId).to.be.ok();
+        expect(job.data.foo).to.be('bar');
+      }, done);
+
+      queue.on('failed', function(job){
+        queue.getJob(job.jobId).then(function(job){
+       //   expect(job).to.be.equal(null);
+        }).then(function(){
+          queue.getJobCounts().then(function(counts){
+            expect(counts.failed).to.be.equal(0);
+            done();
+          });
+        });
+      });
+    });
+
     it('process a lifo queue', function (done) {
       this.timeout(12000);
       var currentValue = 0, first = true;
