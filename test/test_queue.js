@@ -1086,7 +1086,7 @@ describe('Queue', function () {
       return utils.newQueue()
       .then((queue) => {
         console.time('new queue created --> about to call moveToActive');
-        console.time('new queue created --> post-Job.fromData');
+        console.time('new queue created --> pre-Job.fromData');
         return queue
       })
       .then(function (queue) {
