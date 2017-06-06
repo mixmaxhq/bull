@@ -1,0 +1,351 @@
+randall@Mixmaxs-Macbook-Pro ~/Workspace/bull $ mocha --timeout=10000
+
+
+  Cluster
+    - should process each job once
+    - should process delayed jobs in correct order
+    - should process delayed jobs scheduled at the same timestamp in correct order (FIFO)
+
+  connection
+    1) should recover from a connection loss
+    - should reconnect when the blocking client triggers an "end" event
+    - should not try to reconnect when the blocking client triggers an "end" event and no process have been called
+    ✓ should handle jobs added before and after a redis disconnect
+
+  Job
+    ✓ get job status (56ms)
+    .create
+      ✓ returns a promise for the job
+      ✓ should not modify input options
+      ✓ saves the job in redis
+      ✓ should use the custom jobId if one is provided
+1 customjob
+customjob customjob
+      ✓ should process jobs with custom jobIds (5015ms)
+    .remove
+      ✓ removes the job from redis
+      ✓ fails to remove a locked job
+      ✓ removes any job from active set
+      ✓ emits removed event
+      ✓ a succesful job should be removable
+      ✓ a failed job should be removable
+    .retry
+      ✓ emits waiting event
+    Locking
+      ✓ can take a lock
+      ✓ take an already taken lock
+      ✓ can release a lock
+    .progress
+      ✓ can set and get progress
+    .moveToCompleted
+      ✓ marks the job as completed
+    .moveToFailed
+      ✓ marks the job as failed
+      ✓ moves the job to wait for retry if attempts are given
+      ✓ marks the job as failed when attempts made equal to attempts given
+      ✓ moves the job to delayed for retry if attempts are given and backoff is non zero
+    .promote
+      ✓ can promote a delayed job to be executed immediately
+      ✓ should not promote a job that is not delayed
+    .finished
+      ✓ should resolve when the job has been completed (511ms)
+      ✓ should reject when the job has been failed (524ms)
+      ✓ should resolve directly if already processed (513ms)
+      ✓ should reject directly if already processed (514ms)
+      - should resolve using the watchdog if pubsub was lost
+      - should reject using the watchdog if pubsub was lost
+
+  Queue
+    ✓ count added, unprocessed jobs (112ms)
+    ✓ emits waiting event when a job is added
+    ✓ should emit an event when a new message is added to the queue
+    ✓ should emit an event when a job becomes active
+    ✓ should listen to global events
+    .close
+      ✓ should call end on the client
+      ✓ should call end on the event subscriber client
+      ✓ should resolve the promise when each client has disconnected
+      ✓ should return a promise
+      ✓ should close if the job expires after the lockRenewTime (107ms)
+      should be callable from within
+        ✓ a job handler that takes a callback
+        ✓ a job handler that returns a promise
+    instantiation
+      ✓ should create a queue with standard redis opts
+      ✓ should create a queue with a redis connection string
+      ✓ should create a queue with a hostname
+      ✓ creates a queue using the supplied redis DB
+      ✓ creates a queue using custom the supplied redis host
+      ✓ creates a queue with dots in its name
+      ✓ creates a queue accepting port as a string
+      ✓ should create a queue with a prefix option
+      ✓ should allow reuse redis connections
+     a worker
+      ✓ should process a job
+      ✓ should remove job after completed if removeOnComplete
+      ✓ should remove job after failed if removeOnFail
+      2) process a lifo queue
+      3) should processes jobs by priority
+      4) process several jobs serially
+      ✓ process a job that updates progress
+      ✓ process a job that returns data in the process handler
+      ✓ process a job that returns data in the process handler and the returnvalue gets stored in the database
+      ✓ process a job that returns a promise (275ms)
+      ✓ process a job that returns data in a promise (262ms)
+      ✓ process a synchronous job
+      5) process stalled jobs when starting a queue
+      6) processes jobs that were added before the queue backend started
+      ✓ process a named job that returns a promise (263ms)
+      ✓ process a two named jobs that returns a promise (5259ms)
+      ✓ fails job if missing named process
+      7) processes several stalled jobs when starting several queues
+      ✓ does not process a job that is being processed when a new queue starts (514ms)
+      ✓ process stalled jobs without requiring a queue restart (1027ms)
+      ✓ process a job that fails
+      ✓ process a job that throws an exception
+      ✓ process a job that returns data with a circular dependency
+      ✓ process a job that returns a rejected promise
+      ✓ does not renew a job lock after the lock has been released [#397]
+      ✓ retry a job that fails
+    .pause
+      8) should pause a queue until resumed
+      9) should be able to pause a running queue and emit relevant events
+      10) should pause the queue locally
+      11) should wait until active jobs are finished before resolving pause
+      12) should pause the queue locally when more than one worker is active
+      13) should wait for blocking job retrieval to complete before pausing locally
+    Delayed jobs
+      ✓ should process a delayed job only after delayed time (525ms)
+      ✓ should process delayed jobs in correct order (1009ms)
+      ✓ should process delayed jobs in correct order even in case of restart (509ms)
+      14) should process delayed jobs with exact same timestamps in correct order (FIFO)
+      ✓ an unlocked job should not be moved to delayed
+      ✓ an unlocked job should not be moved to waiting
+    Concurrency process
+      ✓ should run job in sequence if I specify a concurrency of 1 (5058ms)
+      15) should process job respecting the concurrency set
+      ✓ should wait for all concurrent processing in case of pause (5177ms)
+    Retries and backoffs
+      ✓ should not retry a job if it has been marked as unrecoverable
+      16) should automatically retry a failed job if attempts is bigger than 1
+      17) should not retry a failed job more than the number of given attempts times
+      ✓ should retry a job after a delay if a fixed backoff is given (2136ms)
+      ✓ should retry a job after a delay if an exponential backoff is given (4028ms)
+      ✓ should not retry a job that has been removed (176ms)
+      ✓ should not retry a job that has been retried already (182ms)
+      ✓ should not retry a job that is locked (130ms)
+      ✓ an unlocked job should not be moved to failed (65ms)
+    Jobs getters
+      ✓ should get waiting jobs (57ms)
+      ✓ should get paused jobs (54ms)
+      ✓ should get active jobs
+      ✓ should get a specific job
+      ✓ should get completed jobs (5074ms)
+      ✓ should get failed jobs (5027ms)
+      ✓ fails jobs that exceed their specified timeout (114ms)
+    getJobs
+      ✓ should return all completed jobs when not setting start/end (10045ms)
+      ✓ should return all failed jobs when not setting start/end (10021ms)
+      ✓ should return subset of jobs when setting positive range (10020ms)
+      ✓ should return subset of jobs when setting a negative range (10024ms)
+      ✓ should return subset of jobs when range overflows (10028ms)
+    Cleaner
+      ✓ should reject the cleaner with no grace
+      ✓ should reject the cleaner an unknown type
+      ✓ should clean an empty queue
+      ✓ should clean two jobs from the queue (5024ms)
+      ✓ should only remove a job outside of the grace period (315ms)
+Unhandled rejection Error: expected 1 to equal 2
+    at Assertion.assert (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:96:13)
+    at Assertion.be.Assertion.equal (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:216:10)
+    at Assertion.(anonymous function) [as be] (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:69:24)
+    at /Users/randall/Workspace/bull/test/test_queue.js:2265:32
+From previous event:
+    at Context.<anonymous> (/Users/randall/Workspace/bull/test/test_queue.js:2264:10)
+    at callFnAsync (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:371:21)
+    at Test.Runnable.run (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:318:7)
+    at Runner.runTest (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:443:10)
+    at /Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:549:12
+    at next (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:361:14)
+    at /Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:371:7
+    at next (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:295:14)
+    at /Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:334:7
+    at done (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:295:5)
+    at callFn (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:366:7)
+    at Hook.Runnable.run (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:340:7)
+    at next (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:309:10)
+    at Immediate.<anonymous> (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:339:5)
+    at runCallback (timers.js:672:20)
+    at tryOnImmediate (timers.js:645:5)
+    at processImmediate [as _immediateCallback] (timers.js:617:5)
+
+      18) should clean all failed jobs
+      ✓ should clean all waiting jobs (106ms)
+      ✓ should clean all delayed jobs (108ms)
+      ✓ should clean the number of jobs requested (110ms)
+Unhandled rejection Error: expected 1 to equal 2
+    at Assertion.assert (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:96:13)
+    at Assertion.be.Assertion.equal (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:216:10)
+    at Assertion.(anonymous function) [as be] (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:69:24)
+    at /Users/randall/Workspace/bull/test/test_queue.js:2332:32
+From previous event:
+    at Context.<anonymous> (/Users/randall/Workspace/bull/test/test_queue.js:2331:10)
+    at callFnAsync (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:371:21)
+    at Test.Runnable.run (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:318:7)
+    at Runner.runTest (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:443:10)
+    at /Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:549:12
+    at next (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:361:14)
+    at /Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:371:7
+    at next (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:295:14)
+    at /Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:334:7
+    at done (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:295:5)
+    at callFn (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:366:7)
+    at Hook.Runnable.run (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runnable.js:340:7)
+    at next (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:309:10)
+    at Immediate.<anonymous> (/Users/randall/.nvm/versions/node/v6.10.3/lib/node_modules/mocha/lib/runner.js:339:5)
+    at runCallback (timers.js:672:20)
+    at tryOnImmediate (timers.js:645:5)
+    at processImmediate [as _immediateCallback] (timers.js:617:5)
+
+      19) should clean a job without a timestamp
+
+  repeat
+    20) should repeat every 2 seconds
+    21) should repeat once a day for 5 days
+    22) should repeat 7:th day every month at 9:25
+
+
+  104 passing (5m)
+  7 pending
+  22 failing
+
+  1) connection should recover from a connection loss:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  2) Queue  a worker process a lifo queue:
+     Error: Timeout of 3000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  3) Queue  a worker should processes jobs by priority:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  4) Queue  a worker process several jobs serially:
+     Error: Timeout of 12000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  5) Queue  a worker process stalled jobs when starting a queue:
+     Error: Timeout of 6000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  6) Queue  a worker processes jobs that were added before the queue backend started:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  7) Queue  a worker processes several stalled jobs when starting several queues:
+     Error: Timeout of 50000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  8) Queue .pause should pause a queue until resumed:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  9) Queue .pause should be able to pause a running queue and emit relevant events:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  10) Queue .pause should pause the queue locally:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  11) Queue .pause should wait until active jobs are finished before resolving pause:
+     Error: expected 1 to equal 0
+      at Assertion.assert (node_modules/expect.js/index.js:96:13)
+      at Assertion.be.Assertion.equal (node_modules/expect.js/index.js:216:10)
+      at Assertion.(anonymous function) [as be] (node_modules/expect.js/index.js:69:24)
+      at test/test_queue.js:1192:32
+  From previous event:
+      at test/test_queue.js:1191:63
+  From previous event:
+      at test/test_queue.js:1190:36
+  From previous event:
+      at test/test_queue.js:1189:27
+      at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:446:3)
+  From previous event:
+      at Context.<anonymous> (test/test_queue.js:1180:23)
+  From previous event:
+
+  12) Queue .pause should pause the queue locally when more than one worker is active:
+     Error: expected 2 to equal 0
+      at Assertion.assert (node_modules/expect.js/index.js:96:13)
+      at Assertion.be.Assertion.equal (node_modules/expect.js/index.js:216:10)
+      at Assertion.(anonymous function) [as be] (node_modules/expect.js/index.js:69:24)
+      at test/test_queue.js:1250:30
+  From previous event:
+      at test/test_queue.js:1249:62
+  From previous event:
+      at test/test_queue.js:1247:94
+  From previous event:
+      at Context.<anonymous> (test/test_queue.js:1246:68)
+  From previous event:
+
+  13) Queue .pause should wait for blocking job retrieval to complete before pausing locally:
+     Error: expected 1 to equal 0
+      at Assertion.assert (node_modules/expect.js/index.js:96:13)
+      at Assertion.be.Assertion.equal (node_modules/expect.js/index.js:216:10)
+      at Assertion.(anonymous function) [as be] (node_modules/expect.js/index.js:69:24)
+      at test/test_queue.js:1284:28
+  From previous event:
+      at test/test_queue.js:1283:59
+  From previous event:
+      at Context.<anonymous> (test/test_queue.js:1282:10)
+  From previous event:
+
+  14) Queue Delayed jobs should process delayed jobs with exact same timestamps in correct order (FIFO):
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  15) Queue Concurrency process should process job respecting the concurrency set:
+     done() invoked with non-Error: {"id":"2","name":"__default__","data":{},"opts":{"attempts":1,"delay":0,"timestamp":1496780993464},"progress":0,"delay":0,"timestamp":1496780993464,"attemptsMade":1,"failedReason":"expected 3 to equal 4","stacktrace":["Error: expected 3 to equal 4\n    at Assertion.assert (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:96:13)\n    at Assertion.be.Assertion.equal (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:216:10)\n    at Assertion.(anonymous function) [as be] (/Users/randall/Workspace/bull/node_modules/expect.js/index.js:69:24)\n    at /Users/randall/Workspace/bull/test/test_queue.js:1592:35\n    at ontimeout (timers.js:386:14)\n    at tryOnTimeout (timers.js:250:5)\n    at Timer.listOnTimeout (timers.js:214:5)\nFrom previous event:\n    at Queue.<anonymous> (/Users/randall/Workspace/bull/test/test_queue.js:1589:36)\nFrom previous event:\n    at Queue.processJob (/Users/randall/Workspace/bull/lib/queue.js:845:22)\n    at /Users/randall/Workspace/bull/lib/queue.js:523:26\nFrom previous event:\n    at /Users/randall/Workspace/bull/lib/queue.js:520:44\n    at runCallback (timers.js:672:20)\n    at tryOnImmediate (timers.js:645:5)\n    at processImmediate [as _immediateCallback] (timers.js:617:5)\nFrom previous event:\n    at /Users/randall/Workspace/bull/lib/queue.js:519:43\n    at _combinedTickCallback (internal/process/next_tick.js:73:7)\n    at process._tickCallback (internal/process/next_tick.js:104:9)"],"returnvalue":null}
+      at lib/queue.js:835:13
+      at tryCatcher (node_modules/bluebird/js/release/util.js:16:23)
+      at Promise._settlePromiseFromHandler (node_modules/bluebird/js/release/promise.js:512:31)
+      at Promise._settlePromise (node_modules/bluebird/js/release/promise.js:569:18)
+      at Promise._settlePromise0 (node_modules/bluebird/js/release/promise.js:614:10)
+      at Promise._settlePromises (node_modules/bluebird/js/release/promise.js:693:18)
+      at Async._drainQueue (node_modules/bluebird/js/release/async.js:133:16)
+      at Async._drainQueues (node_modules/bluebird/js/release/async.js:143:10)
+      at Immediate.Async.drainQueues (node_modules/bluebird/js/release/async.js:17:14)
+
+  16) Queue Retries and backoffs should automatically retry a failed job if attempts is bigger than 1:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  17) Queue Retries and backoffs should not retry a failed job more than the number of given attempts times:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  18) Queue Cleaner should clean all failed jobs:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  19) Queue Cleaner should clean a job without a timestamp:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  20) repeat should repeat every 2 seconds:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  21) repeat should repeat once a day for 5 days:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+  22) repeat should repeat 7:th day every month at 9:25:
+     Error: Timeout of 10000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+
+
+
+

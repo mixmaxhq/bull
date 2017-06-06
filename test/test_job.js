@@ -76,6 +76,7 @@ describe('Job', function(){
       queue.add({ foo: 'bar' }, { jobId: customJobId });
 
       queue.on('completed', function(job) {
+        console.info(job.id, customJobId)
         if (job.id == customJobId) {
           done();
         }
