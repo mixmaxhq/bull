@@ -380,7 +380,7 @@ describe('Queue', function () {
       });
     });
 
-    it('process a lifo queue', function (done) {
+    it.only('process a lifo queue', function (done) {
       this.timeout(3000);
       var currentValue = 0, first = true;
       utils.newQueue('test lifo').then(function (queue2) {
@@ -1079,10 +1079,17 @@ describe('Queue', function () {
       return client.flushdb();
     });
 
-    it('should pause a queue until resumed', function () {
-      var ispaused = false, counter = 2;
+    it.only('should pause a queue until resumed', function () {
+      // var ispaused = false, counter = 2;
+      var ispaused = false, counter = 1;
 
-      return utils.newQueue().then(function (queue) {
+      return utils.newQueue()
+      .then((queue) => {
+        console.time('new queue created --> about to call moveToActive');
+        console.time('new queue created --> post-Job.fromData');
+        return queue
+      })
+      .then(function (queue) {
         var resultPromise = new Promise(function (resolve) {
           queue.process(function (job, jobDone) {
             expect(ispaused).to.be(false);
@@ -1098,8 +1105,8 @@ describe('Queue', function () {
         return Promise.join(queue.pause().then(function () {
           ispaused = true;
           return queue.add({ foo: 'paused' });
-        }).then(function () {
-          return queue.add({ foo: 'paused' });
+        // }).then(function () {
+        //   return queue.add({ foo: 'paused' });
         }).then(function () {
           ispaused = false;
           queue.resume();
